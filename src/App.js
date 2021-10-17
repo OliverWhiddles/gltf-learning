@@ -2,13 +2,32 @@
 import './App.css';
 
 import ReactDOM from 'react-dom'
-import { Canvas } from '@react-three/fiber'
+import { extend, Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
 import * as influence from 'influence-utils'
 import { useLoader } from '@react-three/fiber'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Suspense } from 'react'
 import { OrbitControls } from "@react-three/drei";
+
+//const THREE = require('three');
+const MeshLine = require('three.meshline').MeshLine;
+const MeshLineMaterial = require('three.meshline').MeshLineMaterial;
+const MeshLineRaycast = require('three.meshline').MeshLineRaycast;
+
+//import { MeshLine, MeshLineMaterial, MeshLineRaycast } from 'three.meshline';
+//import * as meshline from 'threejs-meshline'
+
+extend({ MeshLine, MeshLineMaterial })
+
+function Line({ points, width, color}) {
+  return (
+    <mesh>
+      <meshLine attach="geometry" vertices={points} />
+      <meshLineMaterial attach="material" transparent depthTest={false} lineWidth={width} color={color} />
+    </mesh>
+  )
+}
 
 function App() {
 
@@ -48,6 +67,21 @@ function App() {
           <Suspense fallback={null}>
             <ambientLight intensity={0.1} />
             <SystemGridModel />
+            {/* <line geometry={lineGeometry}>
+              <lineBasicMaterial attach="material" color={'#9c88ff'} linewidth={10} />
+            </line> */}
+            {/* <DrawMeshLine curve={points} width={1} color="red" /> */}
+            <mesh raycast={MeshLineRaycast}>
+              <meshLine attach="geometry" points={points} />
+              <meshLineMaterial
+                attach="material"
+                transparent
+                depthTest={false}
+                sizeAttenuation={0}
+                lineWidth={0.01}
+                color={'#9c88ff'}
+              />
+            </mesh>
             <OrbitControls />
           </Suspense>  
         </Canvas>
