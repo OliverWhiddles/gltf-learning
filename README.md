@@ -5,7 +5,8 @@ Playing with GLTF, node.js and vs code
 using:
 - npm install three @react-three/fiber
 - npm install three @react-three/drei
-- npm install three.meshline
+- ~~npm install three.meshline~~
+- npm install NZhuravlev/THREE.MeshLine#master --save 
 - npm install influence-utils
   
 reference:
