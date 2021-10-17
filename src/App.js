@@ -20,6 +20,27 @@ const MeshLineRaycast = require('three.meshline').MeshLineRaycast;
 
 extend({ MeshLine, MeshLineMaterial })
 
+function load_line_json( data )
+{
+  let lines = [];
+
+  for( let line_id = 0; line_id<data.length; line_id++)
+  {
+    let new_line = []
+    for( let vert_id = 0; vert_id<data[line_id].length; vert_id++)
+    {
+      new_line.push(new THREE.Vector3(
+        data[line_id][vert_id][0],
+        data[line_id][vert_id][1],
+        data[line_id][vert_id][2]));
+    }
+    lines.push( new_line );
+    //console.log(new_line);
+  }
+
+  return lines;
+}
+
 function Line({ points, width, colour}) {
   const canvas_size = useThree((state) => state.size)
   
@@ -61,26 +82,38 @@ function App() {
     );
   };
 
+
+  // load the system grids
+  const system_lines_around_data = require("./data/system_grid_lines_around.json");
+  const system_lines_around = load_line_json( system_lines_around_data );
+
+  const system_lines_out_data = require("./data/system_grid_lines_out.json");
+  const system_lines_out = load_line_json( system_lines_out_data );
+
   // load the roid data
   const owned_asteroids = require("./data/owned_asteroids.json");
-  //owned_asteroids.forEach(roid => {
-  //  console.log(`${roid.baseName}`);
-  //});
 
+  const roid_orbit_objects = [];
+  const roid_orbit_lines = [];
 
-  const roid_orbit = new influence.KeplerianOrbit( owned_asteroids[0] )
-  const roid_orbit_points = roid_orbit.getSmoothOrbit(100);
-  const points = []
-  
-  for( let i = 0; i < roid_orbit_points.length;i++)
+  for( let ri = 0; ri<owned_asteroids.length; ri++)
   {
-    points.push(new THREE.Vector3(roid_orbit_points[i].x, roid_orbit_points[i].y, roid_orbit_points[i].y));
-    //console.log( roid_orbit_points[i].x );
+    let roid_orbit = new influence.KeplerianOrbit( owned_asteroids[ri] );
+    roid_orbit_objects.push( roid_orbit );
+    let roid_orbit_points = roid_orbit.getSmoothOrbit(100);
+    let points = [];
+    
+    for( let i = 0; i < roid_orbit_points.length;i++)
+    {
+      points.push(new THREE.Vector3(
+        roid_orbit_points[i].x,
+        roid_orbit_points[i].y,
+        roid_orbit_points[i].z));
+    }
+  
+    points.push( points[0] );
+    roid_orbit_lines.push( points );
   }
-
-  points.push( points[0] );
-
-  const lineGeometry = new THREE.BufferGeometry().setFromPoints(points)
 
   return (
     <div id="canvas-container">
@@ -103,7 +136,15 @@ function App() {
                 color={'#9c88ff'}
               />
             </mesh> */}
-            <Line points={points} width={10} colour={'#9c88ff'} />
+            {system_lines_around.map((line_pts,index) => (
+              <Line key={index} points={line_pts} width={5} colour={'#9c88ff'} />
+            ))}
+            {system_lines_out.map((line_pts,index) => (
+              <Line key={index} points={line_pts} width={5} colour={'#9c88ff'} />
+            ))}
+            {roid_orbit_lines.map((line_pts,index) => (
+              <Line key={index} points={line_pts} width={10} colour={'#DE491F'} />
+            ))}
             <OrbitControls />
             
           </Suspense>  
